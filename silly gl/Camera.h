@@ -1,8 +1,12 @@
-#pragma once
+#define _USE_MATH_DEFINES
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <useful.h>
+#include <math.h>
+
+
 
 class Camera
 {
@@ -28,16 +32,51 @@ public:
 
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
-	void lookAt(glm::vec3 target) {
-		cameraFront += target; // VERY WEIRD CODE, look at should face a position, and change direction facing, reliance on looking at a target should be removed to be honest...
-		view = glm::lookAt(position, position + cameraFront, cameraUp);
-	}
-	void move(glm::vec3 movement) {
-		position += movement;
-		//Only allows movement in one direction. Movement should be based on DIRECTION FACING, and MAGNITUDE OF MOVEMENT IN VECTOR...
+	void changeDirection(glm::vec3 changeDirection) {
+		//something wrong with the Y values here...
+		direction += changeDirection;
+		direction = vec3Clamp(direction, 360.0f);
+		cameraFront = vec3Rotate(changeDirection, cameraFront);
+		outputInfo();
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
 
+	void move(std::string way) {
+		float movementSpeed = 0.1f;
+
+		glm::vec3 change = glm::vec3(0.0f, 0.0f, 0.0f);
+		if (way == "forward") {
+			change.z += (float)cos(direction.x * M_PI / 180);
+			change.x += (float)sin(direction.x * M_PI / 180);
+			change.y += (float)sin(direction.y * M_PI / 180);
+		}
+		else if (way == "back") {
+			change.z -= (float)cos(direction.x * M_PI / 180);
+			change.x -= (float)sin(direction.x * M_PI / 180);
+			change.y -= (float)sin(direction.y * M_PI / 180);
+		}
+		else if (way == "left") {
+			change.x += (float)cos(-1*direction.x * M_PI / 180);
+			change.z += (float)sin(-1*direction.x * M_PI / 180);
+		}
+		else if (way == "right") {
+			change.x -= (float)cos(-1*direction.x * M_PI / 180);
+			change.z -= (float)sin(-1*direction.x * M_PI / 180);
+		}
+
+		vec3Print(position, "position pre-move");
+		position += change * movementSpeed;
+		vec3Print(position, "position post-move");
+		
+		view = glm::lookAt(position, position + cameraFront, cameraUp);
+	}
+	
+	void outputInfo() {
+		vec3Print(cameraFront, "cameraFront");
+		vec3Print(direction, "cameraDirection");
+		vec3Print(position, "cameraPosition");
+	}
 
 };
+
 

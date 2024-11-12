@@ -158,22 +158,58 @@ float rand_float(float a, float b)
 // ---------------------------------------------------------------------------------------------------------
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    float movementSpeed = 0.1f;
 
-    if (key == GLFW_KEY_L and action == GLFW_PRESS) {
-        draw_vertices({
-            glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-            glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-            glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-            });
-    }
-    if (key == GLFW_KEY_E and action == GLFW_PRESS) {
-        draw_cube(0.5, 0.5, 0.5, glm::vec3(rand_float(-1, 1), rand_float(-1, 1), rand_float(-1, 1)));
-    }
-    if (key == GLFW_KEY_W and action == GLFW_PRESS) {
-        globalCamera.move(glm::vec3(0.0f, 0.0f, 0.1f));
-    }
-    if (key == GLFW_KEY_A and action == GLFW_PRESS) {
-        globalCamera.lookAt(glm::vec3(rand_float(-1.0, 1.0f), 0.0f, 0.0f));
+    if (action == GLFW_PRESS) {
+        switch (key) {
+            case GLFW_KEY_L:
+                draw_vertices({
+                    glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
+                    glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
+                    glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
+                    });
+                break;
+            
+            case GLFW_KEY_E:
+                for (int i = 0; i <= 10; i++) {
+                    draw_cube(0.5, 0.5, 0.5, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)));
+                }
+                break;
+
+            case GLFW_KEY_W:
+                globalCamera.move("forward");
+                break;
+
+            case GLFW_KEY_A:
+                globalCamera.move("left");
+                break;
+
+            case GLFW_KEY_S:
+                globalCamera.move("back");
+                break;
+
+            case GLFW_KEY_D:
+                globalCamera.move("right");
+                break;
+
+            case GLFW_KEY_LEFT:
+                globalCamera.changeDirection(glm::vec3(10.0f, 0.0f, 0.0f));
+                break;
+
+            case GLFW_KEY_RIGHT:
+                globalCamera.changeDirection(glm::vec3(-10.0f, 0.0f, 0.0f));
+                break;
+
+            case GLFW_KEY_UP:
+                globalCamera.changeDirection(glm::vec3(0.0f, 10.0f, 0.0f));
+                break;
+
+            case GLFW_KEY_DOWN:
+                globalCamera.changeDirection(glm::vec3(0.0f, -10.0f, 0.0f));
+                break;
+
+
+        }
     }
 }
 
