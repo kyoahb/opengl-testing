@@ -1,3 +1,6 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
 #define _USE_MATH_DEFINES
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -12,7 +15,7 @@ class Camera
 {
 public:
 	glm::vec3 position; // camera position as a vertex in the space
-	glm::vec3 direction; // camera facing direction
+	glm::vec3 direction; // Pitch, -Yaw, Roll
 
 	// Relative positionings
 
@@ -33,11 +36,20 @@ public:
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
 	void changeDirection(glm::vec3 changeDirection) {
-		//something wrong with the Y values here...
-		direction += changeDirection;
+		// Pitch, Yaw, Roll -> changeDirection
+		// Yaw is flipped, think OpenGL just does that
+		direction += glm::vec3(changeDirection.x, -1*changeDirection.y, changeDirection.z);
+
+		// Clamp the pitch to avoid flipping
+		if (direction.x > 85.0f) {
+			direction.x = 85.0f;
+		}
+		if (direction.x < -85.0f) {
+			direction.x = -85.0f;
+		}
 		direction = vec3Clamp(direction, 360.0f);
-		cameraFront = vec3Rotate(changeDirection, cameraFront);
-		outputInfo();
+		cameraFront = vec3Rotate(direction, glm::vec3(0.0f, 0.0f, 1.0f));
+		//outputInfo();
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
 
@@ -46,27 +58,27 @@ public:
 
 		glm::vec3 change = glm::vec3(0.0f, 0.0f, 0.0f);
 		if (way == "forward") {
-			change.z += (float)cos(direction.x * M_PI / 180);
-			change.x += (float)sin(direction.x * M_PI / 180);
-			change.y += (float)sin(direction.y * M_PI / 180);
+			change.z += (float)cos(direction.y * M_PI / 180);
+			change.x += (float)sin(direction.y * M_PI / 180);
+			change.y += (float)sin(-1 * direction.x * M_PI / 180);
 		}
 		else if (way == "back") {
-			change.z -= (float)cos(direction.x * M_PI / 180);
-			change.x -= (float)sin(direction.x * M_PI / 180);
-			change.y -= (float)sin(direction.y * M_PI / 180);
+			change.z -= (float)cos(direction.y * M_PI / 180);
+			change.x -= (float)sin(direction.y * M_PI / 180);
+			change.y -= (float)sin(-1 * direction.x * M_PI / 180);
 		}
 		else if (way == "left") {
-			change.x += (float)cos(-1*direction.x * M_PI / 180);
-			change.z += (float)sin(-1*direction.x * M_PI / 180);
+			change.x += (float)cos(-1 * direction.y * M_PI / 180);
+			change.z += (float)sin(-1 * direction.y * M_PI / 180);
 		}
 		else if (way == "right") {
-			change.x -= (float)cos(-1*direction.x * M_PI / 180);
-			change.z -= (float)sin(-1*direction.x * M_PI / 180);
+			change.x -= (float)cos(-1 * direction.y * M_PI / 180);
+			change.z -= (float)sin(-1 * direction.y * M_PI / 180);
 		}
 
-		vec3Print(position, "position pre-move");
+		//vec3Print(position, "position pre-move");
 		position += change * movementSpeed;
-		vec3Print(position, "position post-move");
+		//vec3Print(position, "position post-move");
 		
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
@@ -78,5 +90,5 @@ public:
 	}
 
 };
-
+#endif
 

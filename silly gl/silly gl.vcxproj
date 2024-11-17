@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\bresk\source\repos\kyoahb\opengl-testing\silly gl;C:\Users\bresk\source\repos\kyoahb\opengl-testing\silly gl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\bresk\source\repos\kyoahb\opengl-testing\silly gl\dlls;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\bresk\source\repos\silly gl\silly gl;C:\Users\bresk\source\repos\silly gl\silly gl\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\bresk\source\repos\silly gl\silly gl\dlls;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,6 +138,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="useful.h" />
     <ClInclude Include="shader_l.h" />
   </ItemGroup>
