@@ -10,22 +10,21 @@
 #include <Camera.h>
 #include <Input.h>
 #include <Renderer.h>
+#include <Objects.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-// settings
-Camera globalCamera;
-InputManager inputManager(&globalCamera);
-
-std::vector<GLint> firsts;
-std::vector<GLsizei> counts;
-bool verticesUpdated = true;
+// settings 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-std::vector<std::vector<glm::vec3>> drawn_vertices = { std::vector<glm::vec3>{glm::vec3(0.0f, 0.0f, 0.0f)} };
-float const vecSize = sizeof(float) * 3;
+
+// load globals
+Camera globalCamera;
+ObjectManager objectManager;
+InputManager inputManager(&globalCamera, &objectManager);
+
 int main()
 {
     // glfw: initialize and configure
@@ -47,9 +46,11 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // tell GLFW to capture our mouse
+    // tell GLFW to capture our mouse and keyboard inputs
+    glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -57,10 +58,9 @@ int main()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
-    // build and compile our shader program
-    // ------------------------------------
-    Renderer renderer(&globalCamera);
-	inputManager.setRenderer(&renderer);
+
+    // setup renderer and hook it into input manager (should be moved away to a unity scripting type system later, but for now this is ok)
+    Renderer renderer(&globalCamera, &objectManager, SCR_WIDTH, SCR_HEIGHT);
     
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -70,41 +70,38 @@ int main()
     glGenBuffers(1, &VBO);
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
     glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
 
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    // glBindVertexArray(0);
+    // enable depth and occlusion culling
     glEnable(GL_DEPTH_TEST);
 
-    glfwSetKeyCallback(window, key_callback);
 
-    float deltaTime = 0.0f;
-    float lastFrame = 0.0f;
-    double lastInput = glfwGetTime();
+    double deltaTime = 0.0f;
+    double lastFrame = 0.0f;
+    double lastSecond = glfwGetTime();
     int frames = 0;
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
         // change deltaTime
-        float currentFrame = glfwGetTime();
+        double currentFrame = glfwGetTime();
         frames++;
-		if (currentFrame - lastInput > 1) {
-            lastInput = currentFrame;
+		if (currentFrame - lastSecond > 1) {
+            // A full second has passed. Return all the frames that have passed between that time.
+            lastSecond = currentFrame;
             std::cout << "FPS: " << frames << "\n";
             frames = 0;
 		}
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+		// input
         inputManager.update(deltaTime);
 
         // render
@@ -132,64 +129,13 @@ int main()
     return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
+// send key callback into inputManager
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	inputManager.key_callback(window, key, scancode, action, mods);
-    /*
-    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-        switch (key) {
-        case GLFW_KEY_L:
-            draw_vertices({
-                glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-                glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-                glm::vec3(rand_float(-1, 1), rand_float(-1, 1), 0.0f),
-                });
-            break;
-
-        case GLFW_KEY_E:
-            for (int i = 0; i <= 10; i++) {
-                draw_cube(0.5, 0.5, 0.5, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)));
-            }
-            break;
-
-        case GLFW_KEY_W:
-            globalCamera.move("forward");
-            break;
-
-        case GLFW_KEY_A:
-            globalCamera.move("left");
-            break;
-
-        case GLFW_KEY_S:
-            globalCamera.move("back");
-            break;
-
-        case GLFW_KEY_D:
-            globalCamera.move("right");
-            break;
-
-        case GLFW_KEY_LEFT:
-            globalCamera.changeDirection(glm::vec3(0.0f, -10.0f, 0.0f)); // Yaw left
-            break;
-
-        case GLFW_KEY_RIGHT:
-            globalCamera.changeDirection(glm::vec3(0.0f, 10.0f, 0.0f)); // Yaw right
-            break;
-
-        case GLFW_KEY_UP:
-            globalCamera.changeDirection(glm::vec3(-10.0f, 0.0f, 0.0f)); // Pitch up
-            break;
-
-        case GLFW_KEY_DOWN:
-            globalCamera.changeDirection(glm::vec3(10.0f, 0.0f, 0.0f)); // Pitch down
-            break;
-        }
-    }
-    */
 }
 
+// send mouse callback into inputManager
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	inputManager.mouse_callback(window, xpos, ypos);
@@ -199,7 +145,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }

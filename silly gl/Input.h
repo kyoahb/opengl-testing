@@ -5,7 +5,7 @@
 #include <string>
 #include <functional>
 #include <Camera.h>
-#include <Renderer.h>
+#include <Objects.h>
 
 class Key {
 public:
@@ -34,19 +34,25 @@ public:
 
 class InputManager {
 public:
-    InputManager(Camera* camera) : globalCamera(camera) {
+    InputManager(Camera* camera, ObjectManager* objManager) : globalCamera(camera), objectManager(objManager) {
 		if (globalCamera == nullptr) {
 			std::cerr << "Error: globalCamera is null" << std::endl;
 		}
-        keys.emplace_back(Key(GLFW_KEY_W, [this]() {}, [this]() {  globalCamera->move("forward");  }));
-		keys.emplace_back(Key(GLFW_KEY_E, [this]() {
-			for (int i = 0; i <= 10; i++) {
-				renderer->draw_cube(0.5, 0.5, 0.5, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)));
-		}}, [this]() { /* hold function for key E */ }));
+        createKey(GLFW_KEY_W, [this]() {}, [this]() {  globalCamera->move("forward");  });
+		createKey(GLFW_KEY_A, [this]() {}, [this]() {  globalCamera->move("left");  });
+		createKey(GLFW_KEY_S, [this]() {}, [this]() {  globalCamera->move("back");  });
+		createKey(GLFW_KEY_D, [this]() {}, [this]() {  globalCamera->move("right");  });
+		createKey(GLFW_KEY_E, [this]() {
+			objectManager->addCube(0.5f, 0.5f, 0.5f, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)), "cube");
+			}, [this]() { /* hold function for key E */ });
+		createKey(GLFW_KEY_Q, [this]() {}, [this]() {  
+			objectManager->rotateMultipleObjects(objectManager->getObjectListByName("cube"), glm::vec3(10.0f, 0.0f, 0.0f));
+			});
+
     }
 
-	void setRenderer(Renderer* render) {
-		renderer = render;
+	void createKey(int keyCode, std::function<void()> pressFunction, std::function<void()> holdFunction) {
+		keys.emplace_back(Key(keyCode, pressFunction, holdFunction));
 	}
 
 	void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -80,14 +86,15 @@ public:
 		lastX = xpos;
 		lastY = ypos;
 
-		float sensitivity = 0.1f;
+		float sensitivity = 0.05f;
 		xoffset *= sensitivity;
 		yoffset *= sensitivity;
 
 		globalCamera->changeDirection(glm::vec3(yoffset, xoffset, 0.0f));
 	};
 
-	void update(float deltaTime) {
+	void update(double dTime) {
+		deltaTime = dTime;
 		manageHeldKeys();
 	}
 
@@ -109,6 +116,7 @@ public:
 	}
 private:
 	Camera* globalCamera;
-	Renderer* renderer;
+	ObjectManager* objectManager;
 	std::vector<Key> keys;
+	double deltaTime;
 };
