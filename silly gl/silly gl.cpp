@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#define GLM_FORCE_SSE42 // or GLM_FORCE_SSE42 if your processor supports it
+#define GLM_FORCE_ALIGNED
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -61,24 +62,6 @@ int main()
 
     // setup renderer and hook it into input manager (should be moved away to a unity scripting type system later, but for now this is ok)
     Renderer renderer(&globalCamera, &objectManager, SCR_WIDTH, SCR_HEIGHT);
-    
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, 0, 0, GL_DYNAMIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // enable depth and occlusion culling
-    glEnable(GL_DEPTH_TEST);
 
 
     double deltaTime = 0.0f;
@@ -107,19 +90,13 @@ int main()
         // render
         // ------
         renderer.render();
-        glBindVertexArray(VAO);
+        //glBindVertexArray(VAO);
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
         glFlush();
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();

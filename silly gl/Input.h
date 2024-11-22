@@ -11,8 +11,8 @@ class Key {
 public:
     const int keyCode;
 	bool isHeld = false;
-	std::function<void()> pressFunction;
-	std::function<void()> holdFunction;
+	std::function<void()> pressFunction = []() {};
+	std::function<void()> holdFunction = []() {};
 
 	Key(int keyCode, std::function<void()> pressFunction, std::function<void()> holdFunction)
 		: keyCode(keyCode), pressFunction(pressFunction), holdFunction(holdFunction) {}
@@ -42,11 +42,9 @@ public:
 		createKey(GLFW_KEY_A, [this]() {}, [this]() {  globalCamera->move("left");  });
 		createKey(GLFW_KEY_S, [this]() {}, [this]() {  globalCamera->move("back");  });
 		createKey(GLFW_KEY_D, [this]() {}, [this]() {  globalCamera->move("right");  });
-		createKey(GLFW_KEY_E, [this]() {
-			objectManager->addCube(0.5f, 0.5f, 0.5f, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)), "cube");
-			}, [this]() { /* hold function for key E */ });
+		createKey(GLFW_KEY_E, [this]() {}, [this]() { objectManager->addCube(0.5f, 0.5f, 0.5f, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)), "cube"); });
 		createKey(GLFW_KEY_Q, [this]() {}, [this]() {  
-			objectManager->rotateMultipleObjects(objectManager->getObjectListByName("cube"), glm::vec3(10.0f, 0.0f, 0.0f));
+			objectManager->rotateObjectsR(objectManager->getObjectListByName("cube"), glm::vec3(10.0f, 0.0f, 0.0f));
 			});
 
     }
@@ -69,6 +67,7 @@ public:
 		}
 	};
 
+	// mouse linked to deltaTime
 	void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 		static double lastX = xpos;
 		static double lastY = ypos;
@@ -87,8 +86,8 @@ public:
 		lastY = ypos;
 
 		float sensitivity = 0.05f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
+		xoffset *= sensitivity * deltaTime;
+		yoffset *= sensitivity * deltaTime;
 
 		globalCamera->changeDirection(glm::vec3(yoffset, xoffset, 0.0f));
 	};

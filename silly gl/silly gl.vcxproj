@@ -139,7 +139,6 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Objects.broken" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="useful.h" />
