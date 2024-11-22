@@ -25,6 +25,8 @@ public:
     std::vector<std::vector<glm::vec3>> objectVertices = { std::vector<glm::vec3>{glm::vec3(0.0f, 0.0f, 0.0f)} };
     Camera* globalCamera;
     ObjectManager* objectManager;
+    //unsigned int VAO, VBO, EBO;
+
 
     Renderer(Camera* camera, ObjectManager* objManager, unsigned int scr_width, unsigned int scr_height) : 
         shader(Shader("shaders/shader.vs", "shaders/shader.fs")), 
@@ -73,6 +75,8 @@ public:
 
             glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(combined_vertices.size() * vecSize), combined_vertices.data(), GL_DYNAMIC_DRAW);
         }
+
+        //glBindVertexArray(VAO);
         glMultiDrawArrays(GL_TRIANGLES, firsts.data(), counts.data(), static_cast<GLsizei>(counts.size()));
     }
 
