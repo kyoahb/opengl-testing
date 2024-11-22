@@ -77,7 +77,6 @@ public:
 
         verticesUpdated = objectManager->haveObjectsUpdated();
         if (verticesUpdated) {
-			std::cout << objects->size() << std::endl;
             std::vector<glm::vec3> combined_vertices;
             std::vector<unsigned int> combined_indices;
             firsts.clear();

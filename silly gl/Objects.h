@@ -51,12 +51,35 @@ public:
 	}
 
 
-	void scale(glm::vec3 scale) {
-		position = scale * position;
+    void scaleInPlace(glm::vec3 scale) {
 		for (auto& vert : vertices) {
-			vert = scale * vert;
+			vert -= position;
+			vert *= scale;
+			vert += position;
 		}
 		objectsUpdated = true;
+    }
+
+	void scale(glm::vec3 scale) {
+		position *= scale;
+		for (auto& vert : vertices) {
+			vert *= scale;
+		}
+		objectsUpdated = true;
+	}
+
+	// Function to get the AABB of the GameObject
+	// Given a min and max vector, it will set the min and max of the AABB
+	void getAABB(glm::vec3& min, glm::vec3& max) const {
+		if (vertices.empty()) {
+			min = max = position;
+			return;
+		}
+		min = max = vertices[0];
+		for (const auto& vert : vertices) {
+			min = glm::min(min, vert);
+			max = glm::max(max, vert);
+		}
 	}
 };
 
@@ -84,6 +107,18 @@ public:
 		objectsUpdated = true;
 	}
 
+	bool checkCollision(GameObject* object1, GameObject* object2) {
+		glm::vec3 min1, max1, min2, max2;
+		object1->getAABB(min1, max1);
+		object2->getAABB(min2, max2);
+
+		// Check for overlap in all three axes
+		bool collisionX = (min1.x <= max2.x && max1.x >= min2.x);
+		bool collisionY = (min1.y <= max2.y && max1.y >= min2.y);
+		bool collisionZ = (min1.z <= max2.z && max1.z >= min2.z);
+
+		return collisionX && collisionY && collisionZ;
+	}
 	// Gets object by its handle name
 	// If multiple objects have the same name, it only returns the first one to be created
 	GameObject* getObjectByName(std::string name) {
