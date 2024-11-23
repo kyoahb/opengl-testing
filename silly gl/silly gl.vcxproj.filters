@@ -17,6 +17,15 @@
       <UniqueIdentifier>{5725b618-56e1-4dd2-bf39-d5a31aafc548}</UniqueIdentifier>
       <Extensions>fs;vs</Extensions>
     </Filter>
+    <Filter Include="GameScripts">
+      <UniqueIdentifier>{4cde4c9c-3677-4925-ab6d-7d0c75426e1e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CPP files">
+      <UniqueIdentifier>{7c1a64b0-ffa5-4a42-916f-399d202176f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\H files">
+      <UniqueIdentifier>{79ada202-7a74-4914-9884-24bd49a6e9f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="silly gl.cpp">
@@ -25,25 +34,28 @@
     <ClCompile Include="dlls\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GameScripts\example.h">
+      <Filter>GameScripts</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader_l.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Useful.h">
+      <Filter>Header Files\H files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="useful.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\H files</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\H files</Filter>
     </ClInclude>
     <ClInclude Include="Objects.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\H files</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files\H files</Filter>
+    </ClInclude>
+    <ClInclude Include="shader_l.h">
+      <Filter>Header Files\H files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

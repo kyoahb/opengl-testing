@@ -12,6 +12,9 @@
 #include <Input.h>
 #include <Renderer.h>
 #include <Objects.h>
+#include <ScriptManager.h>
+
+#include <example.h>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -25,7 +28,7 @@ const unsigned int SCR_HEIGHT = 600;
 Camera globalCamera;
 ObjectManager objectManager;
 InputManager inputManager(&globalCamera, &objectManager);
-
+ScriptManager scriptManager;
 int main()
 {
     // glfw: initialize and configure
@@ -61,8 +64,13 @@ int main()
     }
 
     // setup renderer and hook it into input manager (should be moved away to a unity scripting type system later, but for now this is ok)
-    Renderer renderer(&globalCamera, &objectManager, SCR_WIDTH, SCR_HEIGHT);
+    Renderer renderer(&objectManager, SCR_WIDTH, SCR_HEIGHT);
+    renderer.setCamera(&globalCamera);
 
+    scriptManager.registerScript(new ExampleScript());
+
+    // Start scripts
+    scriptManager.startScripts(&inputManager, &objectManager, &globalCamera, &renderer);
 
     double deltaTime = 0.0f;
     double lastFrame = 0.0f;
@@ -86,6 +94,9 @@ int main()
 
 		// input
         inputManager.update(deltaTime);
+
+        //update scripts
+        scriptManager.updateScripts(deltaTime);
 
         // render
         // ------

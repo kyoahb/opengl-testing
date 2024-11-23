@@ -6,8 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <useful.h>
 #include <math.h>
+#include "Useful.h"
 
 
 
@@ -16,12 +16,6 @@ class Camera
 public:
 	glm::vec3 position; // camera position as a vertex in the space
 	glm::vec3 direction; // Pitch, -Yaw, Roll
-
-	// Relative positionings
-
-	glm::vec3 cameraFront; // Position always in front
-	glm::vec3 cameraRight; // Position always to the right
-	glm::vec3 cameraUp; // Position always above
 
 	glm::mat4 view = glm::mat4(1.0f);
 	Camera() {
@@ -49,7 +43,6 @@ public:
 		}
 		direction = vec3Clamp(direction, 360.0f);
 		cameraFront = vec3Rotate(direction, glm::vec3(0.0f, 0.0f, 1.0f));
-		//outputInfo();
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
 
@@ -75,20 +68,15 @@ public:
 			change.x -= (float)cos(-1 * direction.y * M_PI / 180);
 			change.z -= (float)sin(-1 * direction.y * M_PI / 180);
 		}
-
-		//vec3Print(position, "position pre-move");
 		position += change * movementSpeed;
-		//vec3Print(position, "position post-move");
 		
 		view = glm::lookAt(position, position + cameraFront, cameraUp);
 	}
-	
-	void outputInfo() {
-		vec3Print(cameraFront, "cameraFront");
-		vec3Print(direction, "cameraDirection");
-		vec3Print(position, "cameraPosition");
-	}
 
+private:
+	glm::vec3 cameraFront; // Position always in front
+	glm::vec3 cameraRight; // Position always to the right
+	glm::vec3 cameraUp; // Position always above
 };
 #endif
 

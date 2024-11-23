@@ -6,6 +6,7 @@
 #include <functional>
 #include <Camera.h>
 #include <Objects.h>
+#include <useful.h>
 
 class Key {
 public:
@@ -56,7 +57,7 @@ public:
 		addKey(right);
 
 		Key addCube = Key(GLFW_KEY_E);
-		addCube.holdFunction = [this]() {
+		addCube.pressFunction = [this]() {
 			objectManager->addCube(0.5f, 0.5f, 0.5f, glm::vec3(rand_float(-5, 5), rand_float(-5, 5), rand_float(-5, 5)), "cube");
 			};
 		addKey(addCube);
@@ -75,13 +76,12 @@ public:
 			};
 		addKey(scaleCubes);
 
-		Key scaleIPCubes = Key(GLFW_KEY_T);
-		scaleIPCubes.pressFunction = [this]() {
-			for (auto& object : objectManager->getObjectListByName("cube")) {
-				object->scaleInPlace(glm::vec3(2.0f, 2.0f, 2.0f));
-			}
+		Key moveCube = Key(GLFW_KEY_T);
+		moveCube.pressFunction = [this]() {
+			GameObject* c = objectManager->getObjectByName("cube");
+			c->move(glm::vec3(0.0f, 0.0f, 1.0f));
 			};
-		addKey(scaleIPCubes);
+		addKey(moveCube);
 
 	}
 
@@ -154,5 +154,4 @@ private:
 	ObjectManager* objectManager;
 	std::vector<Key> keys;
 	double deltaTime;
-	float timeSinceLastRotation = 0.0f;
 };

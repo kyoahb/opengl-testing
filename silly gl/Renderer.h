@@ -17,25 +17,22 @@
 class Renderer {
 public:
     Shader shader;
-    std::vector<GLint> firsts;
-    std::vector<GLsizei> counts;
-    bool verticesUpdated = true;
-    unsigned int SCR_WIDTH;
-    unsigned int SCR_HEIGHT;
-    std::vector<GameObject*>* objects;
-    Camera* globalCamera;
-    ObjectManager* objectManager;
-    unsigned int VAO, VBO, EBO;
 
-    Renderer(Camera* camera, ObjectManager* objManager, unsigned int scr_width, unsigned int scr_height) :
-        shader(Shader("shaders/shader.vs", "shaders/shader.fs")),
-        globalCamera(camera),
+
+    Renderer(ObjectManager* objManager, unsigned int scr_width, unsigned int scr_height) :
+        shader(Shader("shaders/shader.vs", "shaders/shader.fs")), 
+        projection(glm::mat4(1.0f)), 
+        model(glm::mat4(1.0f)),
         objectManager(objManager),
         SCR_WIDTH(scr_width),
         SCR_HEIGHT(scr_height)
     {
         objects = objectManager->getObjects();
         verticesUpdated = objectManager->haveObjectsUpdated();
+
+        // Setup globally applied matrices
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         // Using EBO buffers, so vertices can be reused
         // Indices are always needed with vertices in this approach.
@@ -57,23 +54,26 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         glEnable(GL_DEPTH_TEST);
+
+        // Setup shader
+        shader.use();
+        shader.setMat4("model", model);
+        shader.setMat4("view", glm::mat4(1.0f));
+        shader.setMat4("projection", projection);
+    }
+
+    void setCamera(Camera* camera) {
+        globalCamera = camera;
+        view = &(globalCamera->view);
     }
 
     void render() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
-
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = globalCamera->view;
-        glm::mat4 projection = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        projection = glm::perspective(glm::radians(60.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-
-        shader.setMat4("model", model);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+		if (view) {
+			shader.setMat4("view", *view);
+		}
 
         verticesUpdated = objectManager->haveObjectsUpdated();
         if (verticesUpdated) {
@@ -115,6 +115,17 @@ public:
 
 private:
     float const vecSize = sizeof(float) * 3;
+    std::vector<GLint> firsts;
+    std::vector<GLsizei> counts;
+    bool verticesUpdated = true;
+    unsigned int SCR_WIDTH;
+    unsigned int SCR_HEIGHT;
+    std::vector<GameObject*>* objects;
+    Camera* globalCamera;
+    ObjectManager* objectManager;
+    unsigned int VAO, VBO, EBO;
+    glm::mat4 projection, model;
+	glm::mat4* view; // only initialised if camera is set
 };
 
 #endif
